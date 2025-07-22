@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>위시리스트</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .card-header { background-color: #2c3e50; color: white; }
+        .card-header h4 { margin: 0; }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h4>위시리스트</h4>
+        </div>
+        <div class="card-body">
+            <form id="add-wish-form" class="row mb-4">
+                <div class="col">
+                    <input type="number" id="productId" class="form-control" placeholder="상품 ID 입력" required />
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">상품 추가</button>
+                </div>
+            </form>
+
+            <table class="table table-hover text-center align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>상품명</th>
+                    <th>가격</th>
+                    <th>이미지</th>
+                    <th>수량</th>
+                    <th>작업</th>
+                </tr>
+                </thead>
+                <tbody id="wish-tbody"></tbody>
+            </table>
+
+            <nav>
+                <ul class="pagination justify-content-center" id="pagination"></ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem("accessToken");
+    let currentPage = 0;
+    const size = 5;
+
+    async function loadWishes(page = 0) {
+        currentPage = page;
+
+        const res = await fetch(`/api/wishes?page=${page}&size=${size}`, {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!res.ok) {
+            alert("위시리스트 불러오기 실패: " + await res.text());
+            return;
+        }
+
+        const data = await res.json();
+        renderWishes(data.content);
+        renderPagination(data.totalPages, data.number);
+    }
+
+    function renderWishes(wishes) {
+        const tbody = document.getElementById("wish-tbody");
+        tbody.innerHTML = "";
+
+        if (wishes.length === 0) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.setAttribute("colspan", "5");
+            cell.textContent = "목록에 상품이 없습니다.";
+            row.appendChild(cell);
+            tbody.appendChild(row);
+            return;
+        }
+
+        wishes.forEach(product => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+        <td>${product.name}</td>
+        <td>${product.price}원</td>
+        <td><img src="${product.imgUrl}" alt="상품 이미지" width="80"/></td>
+        <td>
+          <input type="number" value="${product.quantity}" min="0"
+                 class="form-control form-control-sm quantity-input" data-id="${product.productId}" />
+        </td>
+        <td>
+          <button class="btn btn-primary btn-sm me-1" onclick="changeQuantity(${product.productId})">변경</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteWish(${product.productId})">삭제</button>
+        </td>
+      `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    function renderPagination(totalPages, currentPage) {
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+
+        for (let i = 0; i < totalPages; i++) {
+            const li = document.createElement("li");
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+
+            const btn = document.createElement("button");
+            btn.className = "page-link";
+            btn.textContent = i + 1;
+            btn.onclick = () => loadWishes(i);
+
+            li.appendChild(btn);
+            pagination.appendChild(li);
+        }
+    }
+
+    async function deleteWish(productId) {
+        console.log("삭제 요청:", productId);
+
+        const res = await fetch(`/api/wishes/${productId}`, {
+            method: "DELETE",
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        const text = await res.text();
+
+        if (res.ok) {
+            alert("상품이 삭제되었습니다.");
+            await loadWishes(currentPage);
+        } else {
+            alert(`삭제 실패 (${res.status}): ${text}`);
+        }
+    }
+
+    async function changeQuantity(productId) {
+        const input = document.querySelector(`input.quantity-input[data-id="${productId}"]`);
+        const quantity = parseInt(input.value, 10);
+
+        if (isNaN(quantity) || quantity < 0) {
+            alert("수량은 0 이상의 숫자여야 합니다.");
+            return;
+        }
+
+        if (quantity === 0) {
+            await deleteWish(productId);
+            return;
+        }
+
+        const res = await fetch(`/api/wishes`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({ productId, quantity })
+        });
+
+        if (res.ok) {
+            alert("수량이 변경되었습니다.");
+            await loadWishes(currentPage);
+        } else {
+            alert("수량 변경 실패: " + await res.text());
+        }
+    }
+
+    document.getElementById("add-wish-form").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const productId = document.getElementById("productId").value;
+
+        const res = await fetch("/api/wishes", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({ productId: Number(productId) })
+        });
+
+        if (res.ok) {
+            alert("상품 추가 완료");
+            await loadWishes(currentPage);
+            document.getElementById("productId").value = "";
+        } else {
+            alert("상품 추가 실패: " + await res.text());
+        }
+    });
+
+    window.addEventListener("DOMContentLoaded", () => loadWishes());
+</script>
+</body>
+</html>
