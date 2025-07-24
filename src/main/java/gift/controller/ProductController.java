@@ -19,11 +19,11 @@ import java.util.List;
 @RequestMapping("/api")
 @RestController
 public class ProductController {
-    private final ProductRepository productDao;
+    private final ProductRepository productRepository;
     private final ProductOptionRepository productOptionRepository;
 
-    public ProductController(ProductRepository productDao, ProductOptionRepository productOptionRepository) {
-        this.productDao = productDao;
+    public ProductController(ProductRepository productRepository, ProductOptionRepository productOptionRepository) {
+        this.productRepository = productRepository;
         this.productOptionRepository = productOptionRepository;
     }
 
@@ -39,12 +39,12 @@ public class ProductController {
                 Sort.by(sortBy).descending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
-        return productDao.findAll(pageable);
+        return productRepository.findAll(pageable);
     }
 
     @GetMapping("/products/{id}")
     public Product getProductById(@PathVariable Long id) {
-        return productDao.findById(id)
+        return productRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("해당 상품이 없습니다. id=" + id));
     }
 
@@ -59,7 +59,7 @@ public class ProductController {
             product.setMdApproved(true);
         }
 
-        productDao.save(product);
+        productRepository.save(product);
 
         for (ProductOptionDTO optDto : dto.options()) {
             ProductOption option = new ProductOption(product, optDto.name(), optDto.quantity());
@@ -77,7 +77,7 @@ public class ProductController {
 
     @DeleteMapping("products/{id}")
     public void deleteProduct(@PathVariable Long id) {
-        productDao.deleteById(id);
+        productRepository.deleteById(id);
     }
 
     @PatchMapping("/products/{id}")
@@ -87,7 +87,7 @@ public class ProductController {
         }else{
             product.setMdApproved(false);
         }
-        productDao.save(product);
+        productRepository.save(product);
     }
 
 }
