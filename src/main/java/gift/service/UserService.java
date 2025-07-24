@@ -11,42 +11,42 @@ import java.util.Optional;
 
 @Service
 public class UserService {
-    private final UserRepository userDao;
+    private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public UserService(UserRepository userDao, JwtTokenProvider jwtTokenProvider) {
-        this.userDao = userDao;
+    public UserService(UserRepository userRepository, JwtTokenProvider jwtTokenProvider) {
+        this.userRepository = userRepository;
         this.jwtTokenProvider = jwtTokenProvider;
     }
     public String login(LoginRequestDTO login) {
-        Optional<User> userOpt = userDao.findByUserid(login.getUserid());
+        Optional<User> userOpt = userRepository.findByUserid(login.getUserid());
         User user = userOpt.orElseThrow(() -> new RuntimeException("없음"));
         return jwtTokenProvider.createToken(user.getUserid(),user.getPassword());
     }
 
     public User findByUserId(String userId) {
-        Optional<User> userOpt = userDao.findByUserid(userId);
+        Optional<User> userOpt = userRepository.findByUserid(userId);
         User user = userOpt.orElseThrow(() -> new RuntimeException("user 찾을 수 없음"));
         return user;
     }
 
     public void createUser(User user) {
-        userDao.save(user);
+        userRepository.save(user);
     }
 
     public List<User> getAllUsers() {
-        return userDao.findAll();
+        return userRepository.findAll();
     }
 
     public void removeUser(Long id) {
-        userDao.deleteById(id);
+        userRepository.deleteById(id);
     }
 
     public Optional<User> findUserById(Long id) {
-        return userDao.findById(id);
+        return userRepository.findById(id);
     }
 
     public void updateUser(Long id, User user) {
-        userDao.save(user);
+        userRepository.save(user);
     }
 }

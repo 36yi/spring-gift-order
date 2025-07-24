@@ -11,15 +11,15 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/admin/products")
 public class AdminProductController {
-    private final ProductRepository productDao;
+    private final ProductRepository productRepository;
 
-    public AdminProductController(ProductRepository productDao) {
-        this.productDao = productDao;
+    public AdminProductController(ProductRepository productRepository) {
+        this.productRepository = productRepository;
     }
 
     @GetMapping
     public String list(Model model) {
-        model.addAttribute("products", productDao.findAll());
+        model.addAttribute("products", productRepository.findAll());
         return "product/list";
     }
 
@@ -38,13 +38,13 @@ public class AdminProductController {
         if (!product.getName().contains("카카오")) {
             product.setMdApproved(true);
         }
-        productDao.save(product);
+        productRepository.save(product);
         return "redirect:/admin/products";
     }
 
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Long id, Model model) {
-        Product product = productDao.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 상품이 없습니다. id=" + id));
         model.addAttribute("product", product);
         return "product/form";
@@ -61,22 +61,22 @@ public class AdminProductController {
             model.addAttribute("infoMessage", "카카오가 포함된 상품은 MD 승인 후 사용 가능합니다.");
         }
 
-        productDao.save(product);
+        productRepository.save(product);
         return "redirect:/admin/products";
     }
 
     @PostMapping("/delete/{id}")
     public String delete(@PathVariable Long id) {
-        productDao.deleteById(id);
+        productRepository.deleteById(id);
         return "redirect:/admin/products";
     }
 
     @PostMapping("/approve/{id}")
     public String approve(@PathVariable Long id) {
-        Product product = productDao.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 상품이 없습니다. id=" + id));
         product.setMdApproved(true);
-        productDao.save(product);
+        productRepository.save(product);
         return "redirect:/admin/products";
     }
 
