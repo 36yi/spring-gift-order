@@ -18,7 +18,7 @@ public class KakaoLoginController {
     }
 
 
-    @GetMapping("/login/kakao")
+    @GetMapping("/kakao/login")
     public String page(Model model){
         model.addAttribute("kakaoAPIKey",kakaoAPIKey);
         return "kakao/page";
@@ -27,10 +27,15 @@ public class KakaoLoginController {
     @GetMapping("")
     public String handleKakaoRedirect(@RequestParam(required = false) String code) {
         if (code != null) {
-            kakaoOAuthService.processKakaoLogin(code);
-            return "redirect:/admin/users";
+            String jwtToken = kakaoOAuthService.processKakaoLogin(code);
+            return "redirect:/kakao/loginSuccess?token=" + jwtToken;
         } else {
             return "redirect:/error";
         }
+    }
+    @GetMapping("/kakao/loginSuccess")
+    public String loginSuccessPage(@RequestParam String token, Model model) {
+        model.addAttribute("token", token);
+        return "kakao/loginSuccess";
     }
 }

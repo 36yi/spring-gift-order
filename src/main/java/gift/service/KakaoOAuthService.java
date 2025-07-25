@@ -3,6 +3,7 @@ package gift.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gift.dto.KakaoUserDTO;
+import gift.dto.LoginRequestDTO;
 import gift.model.User;
 import gift.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,24 +19,34 @@ import java.util.Optional;
 @Service
 public class KakaoOAuthService {
     private final UserRepository userRepository;
+    private final UserService userService;
     @Value("${kakao.RESTAPIKEY}")
     private String kakaoAPIKey;
 
-    public KakaoOAuthService(UserRepository userRepository) {this.userRepository = userRepository;}
+    public KakaoOAuthService(UserRepository userRepository, UserService userService) {
+        this.userRepository = userRepository;
+        this.userService = userService;
+    }
 
-    public void processKakaoLogin(String code) {
+    public String processKakaoLogin(String code) {
         String token = getAccessToken(code);
         System.out.println(token);
         KakaoUserDTO userInfo = getUserInfo(token);
 
+        String kakaoIdStr = String.valueOf(userInfo.id());
+        String userid = "kakao_ID_" + kakaoIdStr;
+        String password = "kakao_PW_" + kakaoIdStr;
 
-//        Optional<User> userOpt = userRepository.findByOauthProviderAndOauthId("kakao", userInfo.getId());
-//
-//        User user = userOpt.orElseGet(() ->
-//                userRepository.save(new User(...userInfo...))
-//    );
-//
-//        login(user);
+        Optional<User> userOpt = userRepository.findByUserid(userid);
+        User user = userOpt.orElseGet(() -> {
+            User newUser = new User(userid,password,"USER");
+            return userRepository.save(newUser);
+        });
+        LoginRequestDTO loginRequest = new LoginRequestDTO();
+        loginRequest.setUserid(userid);
+        loginRequest.setPassword(password);
+
+        return userService.login(loginRequest);
     }
 
     private KakaoUserDTO getUserInfo(String token) {
@@ -54,10 +65,8 @@ public class KakaoOAuthService {
             JsonNode root = objectMapper.readTree(response.getBody());
 
             Long id = root.path("id").asLong();
-            String nickname = root.path("kakao_account").path("profile").path("nickname").asText();
-            String email = root.path("kakao_account").path("email").asText(null);
 
-            return new KakaoUserDTO(id, nickname, email);
+            return new KakaoUserDTO(id);
 
         } catch (Exception e) {
             throw new RuntimeException("카카오 사용자 정보 파싱 실패", e);
