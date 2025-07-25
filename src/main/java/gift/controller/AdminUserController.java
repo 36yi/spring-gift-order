@@ -2,6 +2,7 @@ package gift.controller;
 
 import gift.model.User;
 import gift.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ public class AdminUserController {
     public AdminUserController(UserService userService) {
         this.userService = userService;
     }
+
     @GetMapping("/add")
     public String addForm(Model model){
         return "user/addForm";
@@ -47,4 +49,5 @@ public class AdminUserController {
         userService.updateUser(id,user);
         return "redirect:/admin/users";
     }
+
 }
