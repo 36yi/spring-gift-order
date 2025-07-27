@@ -21,6 +21,11 @@ public class User {
 
     protected User() {
     }
+    public User(String userid, String password, String role) {
+        this.userid = userid;
+        this.password = password;
+        this.role = role;
+    }
 
     public Long getId() { return id; }
     public String getUserid() { return userid; }

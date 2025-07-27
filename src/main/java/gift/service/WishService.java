@@ -15,16 +15,16 @@ import java.util.List;
 
 @Service
 public class WishService {
-    private final WishRepository wishDao;
+    private final WishRepository wishRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
 
-    public WishService(ProductRepository productRepository, UserRepository userRepository, WishRepository wishDao, JwtTokenProvider jwtTokenProvider) {
+    public WishService(ProductRepository productRepository, UserRepository userRepository, WishRepository wishRepository, JwtTokenProvider jwtTokenProvider) {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
-        this.wishDao = wishDao;
+        this.wishRepository = wishRepository;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
@@ -35,45 +35,45 @@ public class WishService {
 
         Wish wish = new Wish(user, product, 1L);
 
-        wishDao.save(wish);
+        wishRepository.save(wish);
     }
 
     public void deleteWish(Long userId, Long productId) {
         User user = userRepository.getReferenceById(userId);
         Product product = productRepository.getReferenceById(productId);
 
-        wishDao.deleteByUserAndProduct(user, product);
+        wishRepository.deleteByUserAndProduct(user, product);
     }
 
     public List<Wish> getAllWish(Long userId) {
         User user = userRepository.getReferenceById(userId);
-        return wishDao.findAllByUser(user);
+        return wishRepository.findAllByUser(user);
     }
     public void increaseWish(Long userId, Long productId) {
         User user = userRepository.getReferenceById(userId);
         Product product = productRepository.getReferenceById(productId);
 
-        Wish wish = wishDao.findByUserAndProduct(user, product)
+        Wish wish = wishRepository.findByUserAndProduct(user, product)
                 .orElseThrow(() -> new IllegalArgumentException("해당 찜 기록이 없습니다."));
 
         wish.setCount(wish.getCount() + 1);
-        wishDao.save(wish);
+        wishRepository.save(wish);
     }
 
     public void decreaseWish(Long userId, Long productId) {
         User user = userRepository.getReferenceById(userId);
         Product product = productRepository.getReferenceById(productId);
 
-        Wish wish = wishDao.findByUserAndProduct(user, product)
+        Wish wish = wishRepository.findByUserAndProduct(user, product)
                 .orElseThrow(() -> new IllegalArgumentException("해당 찜 기록이 없습니다."));
 
         if (wish.getCount() > 0) {
             wish.setCount(wish.getCount() - 1);
-            wishDao.save(wish);
+            wishRepository.save(wish);
         }
     }
     public Page<Wish> getPagedWishList(Long userId, Pageable pageable) {
         User user = userRepository.getReferenceById(userId);
-        return wishDao.findAllByUser(user, pageable);
+        return wishRepository.findAllByUser(user, pageable);
     }
 }
