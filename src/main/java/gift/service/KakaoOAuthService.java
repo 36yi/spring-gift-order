@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gift.dto.KakaoUserDTO;
 import gift.dto.LoginRequestDTO;
 import gift.model.KakaoOAuthUtils;
+import gift.model.Role;
 import gift.model.User;
 import gift.repository.UserRepository;
 import gift.service.external.KakaoApi;
@@ -43,7 +44,7 @@ public class KakaoOAuthService {
 
         Optional<User> userOpt = userRepository.findByUserid(userid);
         User user = userOpt.orElseGet(() -> {
-            User newUser = new User(userid,password,"USER");
+            User newUser = new User(userid,password, Role.USER);
             return userRepository.save(newUser);
         });
         LoginRequestDTO loginRequest = new LoginRequestDTO();
