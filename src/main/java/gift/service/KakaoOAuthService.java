@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gift.dto.KakaoUserDTO;
 import gift.dto.LoginRequestDTO;
+import gift.model.KakaoOAuthUtils;
 import gift.model.User;
 import gift.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,8 @@ import java.util.Optional;
 public class KakaoOAuthService {
     private final UserRepository userRepository;
     private final UserService userService;
+
+
     @Value("${kakao.RESTAPIKEY}")
     private String kakaoAPIKey;
 
@@ -33,8 +36,8 @@ public class KakaoOAuthService {
         KakaoUserDTO userInfo = getUserInfo(token);
 
         String kakaoIdStr = String.valueOf(userInfo.id());
-        String userid = "kakao_ID_" + kakaoIdStr;
-        String password = "kakao_PW_" + kakaoIdStr;
+        String userid = KakaoOAuthUtils.getUserId(kakaoIdStr);
+        String password = KakaoOAuthUtils.getUserPw(kakaoIdStr);
 
         Optional<User> userOpt = userRepository.findByUserid(userid);
         User user = userOpt.orElseGet(() -> {
