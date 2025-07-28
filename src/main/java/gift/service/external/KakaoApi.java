@@ -3,6 +3,8 @@ package gift.service.external;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gift.dto.KakaoUserDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import java.util.Map;
 
 @Component
 public class KakaoApi {
+    private static final Logger log = LoggerFactory.getLogger(KakaoApi.class);
 
     @Value("${kakao.rest-api-key}")
     private String kakaoAPIKey;
@@ -49,6 +52,7 @@ public class KakaoApi {
         }
     }
     public KakaoUserDTO getUserInfo(String accessToken){
+        log.info("Access Token: {}", accessToken);
         String url = "https://kapi.kakao.com/v2/user/me";
 
         HttpHeaders headers = new HttpHeaders();
@@ -61,11 +65,8 @@ public class KakaoApi {
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode root = objectMapper.readTree(response.getBody());
-
-            Long id = root.path("id").asLong();
-
-            return new KakaoUserDTO(id);
+            KakaoUserDTO user = objectMapper.readValue(response.getBody(), KakaoUserDTO.class);
+            return user;
 
         } catch (Exception e) {
             throw new RuntimeException("카카오 사용자 정보 파싱 실패", e);
