@@ -30,7 +30,6 @@ public class KakaoOAuthService {
 
     public String processKakaoLogin(String code) {
         String token = getAccessToken(code);
-        System.out.println(token);
         KakaoUserDTO userInfo = getUserInfo(token);
 
         String kakaoIdStr = String.valueOf(userInfo.id());
