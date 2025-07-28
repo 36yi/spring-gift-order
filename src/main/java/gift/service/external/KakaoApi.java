@@ -15,8 +15,11 @@ import java.util.Map;
 @Component
 public class KakaoApi {
 
-    @Value("${kakao.RESTAPIKEY}")
+    @Value("${kakao.rest-api-key}")
     private String kakaoAPIKey;
+    @Value("${kakao.redirect-uri}")
+    private String kakaoRedirectUri;
+
 
     public String getAccessToken(String code){
         RestTemplate restTemplate = new RestTemplate();
@@ -27,7 +30,7 @@ public class KakaoApi {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", kakaoAPIKey);
-        params.add("redirect_uri", "http://localhost:8080");
+        params.add("redirect_uri", kakaoRedirectUri);
         params.add("code", code);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
