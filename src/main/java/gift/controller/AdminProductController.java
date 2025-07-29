@@ -2,6 +2,7 @@ package gift.controller;
 
 import gift.model.Product;
 import gift.repository.ProductRepository;
+import gift.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,15 +12,15 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/admin/products")
 public class AdminProductController {
-    private final ProductRepository productRepository;
+    private final ProductService productService;
 
-    public AdminProductController(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public AdminProductController(ProductService productService) {
+        this.productService = productService;
     }
 
     @GetMapping
     public String list(Model model) {
-        model.addAttribute("products", productRepository.findAll());
+        model.addAttribute("products", productService.findAll());
         return "product/list";
     }
 
@@ -38,14 +39,13 @@ public class AdminProductController {
         if (!product.getName().contains("카카오")) {
             product.setMdApproved(true);
         }
-        productRepository.save(product);
+        productService.addProductByAdmin(product);
         return "redirect:/admin/products";
     }
 
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Long id, Model model) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 상품이 없습니다. id=" + id));
+        Product product = productService.getProductById(id);
         model.addAttribute("product", product);
         return "product/form";
     }
@@ -61,22 +61,21 @@ public class AdminProductController {
             model.addAttribute("infoMessage", "카카오가 포함된 상품은 MD 승인 후 사용 가능합니다.");
         }
 
-        productRepository.save(product);
+        productService.updateProduct(product);
         return "redirect:/admin/products";
     }
 
     @PostMapping("/delete/{id}")
     public String delete(@PathVariable Long id) {
-        productRepository.deleteById(id);
+        productService.deleteProduct(id);
         return "redirect:/admin/products";
     }
 
     @PostMapping("/approve/{id}")
     public String approve(@PathVariable Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 상품이 없습니다. id=" + id));
+        Product product = productService.getProductById(id);
         product.setMdApproved(true);
-        productRepository.save(product);
+        productService.updateProduct(product);
         return "redirect:/admin/products";
     }
 

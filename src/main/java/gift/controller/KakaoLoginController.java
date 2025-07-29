@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class KakaoLoginController {
     private final KakaoOAuthService kakaoOAuthService;
-    @Value("${kakao.RESTAPIKEY}")
+    @Value("${kakao.rest-api-key}")
     private String kakaoAPIKey;
 
     public KakaoLoginController(KakaoOAuthService kakaoOAuthService) {

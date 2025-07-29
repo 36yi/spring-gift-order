@@ -1,12 +1,9 @@
 package gift.controller;
 
-import gift.dto.ProductOptionDTO;
 import gift.dto.ProductOptionResponseDTO;
 import gift.dto.ProductRequestDTO;
 import gift.model.Product;
-import gift.model.ProductOption;
-import gift.repository.ProductOptionRepository;
-import gift.repository.ProductRepository;
+import gift.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,12 +16,10 @@ import java.util.List;
 @RequestMapping("/api")
 @RestController
 public class ProductController {
-    private final ProductRepository productRepository;
-    private final ProductOptionRepository productOptionRepository;
+    private final ProductService productService;
 
-    public ProductController(ProductRepository productRepository, ProductOptionRepository productOptionRepository) {
-        this.productRepository = productRepository;
-        this.productOptionRepository = productOptionRepository;
+    public ProductController(ProductService productService) {
+        this.productService = productService;
     }
 
     @GetMapping("/products")
@@ -39,55 +34,32 @@ public class ProductController {
                 Sort.by(sortBy).descending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
-        return productRepository.findAll(pageable);
+        return productService.getAllProducts(pageable);
     }
 
     @GetMapping("/products/{id}")
     public Product getProductById(@PathVariable Long id) {
-        return productRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("해당 상품이 없습니다. id=" + id));
+        return productService.getProductById(id);
     }
 
     @PostMapping("/products")
     public void addProduct(@Valid @RequestBody ProductRequestDTO dto) {
-        Product product = new Product();
-        product.setName(dto.name());
-        product.setPrice(dto.price());
-        product.setImage(dto.image());
-
-        if (!dto.name().contains("카카오")) {
-            product.setMdApproved(true);
-        }
-
-        productRepository.save(product);
-
-        for (ProductOptionDTO optDto : dto.options()) {
-            ProductOption option = new ProductOption(product, optDto.name(), optDto.quantity());
-            productOptionRepository.save(option);
-        }
+        productService.addProduct(dto);
     }
 
     @GetMapping("/products/{productId}/options")
     public List<ProductOptionResponseDTO> getOptions(@PathVariable Long productId) {
-        List<ProductOption> options = productOptionRepository.findByProductId(productId);
-        return options.stream()
-                .map(opt -> new ProductOptionResponseDTO(opt.getId(), opt.getName(), opt.getQuantity()))
-                .toList();
+        return productService.getOptions(productId);
     }
 
     @DeleteMapping("products/{id}")
     public void deleteProduct(@PathVariable Long id) {
-        productRepository.deleteById(id);
+        productService.deleteProduct(id);
     }
 
     @PatchMapping("/products/{id}")
     public void updateProduct(@Valid @PathVariable Long id, @RequestBody Product product) {
-        if(!product.getName().contains("카카오")){
-            product.setMdApproved(true);
-        }else{
-            product.setMdApproved(false);
-        }
-        productRepository.save(product);
+        productService.updateProduct(product);
     }
 
 }
