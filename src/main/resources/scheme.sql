@@ -34,13 +34,13 @@ CREATE TABLE product_option (
 );
 
 CREATE TABLE orders (
-                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                        user_id BIGINT NOT NULL,
-                        option_id BIGINT NOT NULL,
-                        quantity INT NOT NULL CHECK (quantity >= 1 AND quantity < 100000000),
-                        message TEXT,
-                        order_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    option_id BIGINT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity >= 1 AND quantity < 100000000),
+    message TEXT,
+    order_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-                        CONSTRAINT fk_order_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                        CONSTRAINT fk_order_option FOREIGN KEY (option_id) REFERENCES product_option(id) ON DELETE CASCADE
+    CONSTRAINT fk_order_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_order_option FOREIGN KEY (option_id) REFERENCES product_option(id) ON DELETE CASCADE
 );
