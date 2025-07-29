@@ -3,6 +3,9 @@ package gift.service.external;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gift.dto.KakaoUserDTO;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +54,7 @@ public class KakaoApi {
             throw new RuntimeException("토큰 요청 실패");
         }
     }
+
     public KakaoUserDTO getUserInfo(String accessToken){
         log.info("Access Token: {}", accessToken);
         String url = "https://kapi.kakao.com/v2/user/me";
@@ -70,6 +74,37 @@ public class KakaoApi {
 
         } catch (Exception e) {
             throw new RuntimeException("카카오 사용자 정보 파싱 실패", e);
+        }
+    }
+    public void sendToMe(String accessToken, String messageText) throws JSONException {
+        String url = "https://kapi.kakao.com/v2/api/talk/memo/default/send";
+        log.info("Access Token: {}", accessToken);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        JSONObject linkObj = new JSONObject();
+        linkObj.put("web_url", "about:blank");
+        linkObj.put("mobile_web_url", "about:blank");
+
+        JSONObject templateObj = new JSONObject();
+        templateObj.put("object_type", "text");
+        templateObj.put("text", messageText);
+        templateObj.put("link", linkObj);
+        templateObj.put("button_title", "확인");
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("template_object", templateObj.toString());
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+        RestTemplate restTemplate = new RestTemplate();
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            log.info("카카오톡 메시지 전송 완료: {}", response.getBody());
+        } catch (Exception e) {
+            log.error("카카오톡 메시지 전송 실패", e);
         }
     }
 }

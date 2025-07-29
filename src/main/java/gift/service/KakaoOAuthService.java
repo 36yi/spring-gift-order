@@ -51,7 +51,7 @@ public class KakaoOAuthService {
         loginRequest.setUserid(userid);
         loginRequest.setPassword(password);
 
-        return userService.login(loginRequest);
+        return userService.kakaoLogin(loginRequest, token);
     }
 
     private KakaoUserDTO getUserInfo(String token) {

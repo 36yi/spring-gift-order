@@ -2,6 +2,7 @@ package gift.service;
 
 import gift.dto.LoginRequestDTO;
 import gift.jwt.JwtTokenProvider;
+import gift.model.Role;
 import gift.model.User;
 import gift.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,13 @@ public class UserService {
     public String login(LoginRequestDTO login) {
         Optional<User> userOpt = userRepository.findByUserid(login.getUserid());
         User user = userOpt.orElseThrow(() -> new RuntimeException("없음"));
-        return jwtTokenProvider.createToken(user.getUserid(),user.getPassword());
+        return jwtTokenProvider.createToken(user.getUserid(),user.getPassword(),null);
+    }
+
+    public String kakaoLogin(LoginRequestDTO login, String kakaoAccessToken) {
+        Optional<User> userOpt = userRepository.findByUserid(login.getUserid());
+        User user = userOpt.orElseThrow(() -> new RuntimeException("없음"));
+        return jwtTokenProvider.createToken(user.getUserid(), user.getPassword(), kakaoAccessToken);
     }
 
     public User findByUserId(String userId) {

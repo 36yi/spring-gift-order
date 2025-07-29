@@ -18,20 +18,20 @@ import java.time.LocalDateTime;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductOptionRepository productOptionRepository;
-    private final UserRepository userRepository;
+    private final KakaoMessageService kakaoMessageService;
     private final WishRepository wishRepository;
 
     public OrderService(OrderRepository orderRepository,
                         ProductOptionRepository optionRepository,
-                        UserRepository userRepository,
+                        KakaoMessageService kakaoMessageService,
                         WishRepository wishRepository) {
         this.orderRepository = orderRepository;
         this.productOptionRepository = optionRepository;
-        this.userRepository = userRepository;
         this.wishRepository = wishRepository;
+        this.kakaoMessageService = kakaoMessageService;
         }
 
-    public OrderResponseDTO createOrder(OrderRequestDTO request, User user) {
+    public OrderResponseDTO createOrder(OrderRequestDTO request, User user,String accessToken) {
         ProductOption option = productOptionRepository.findById(request.optionId())
                 .orElseThrow(() -> new IllegalArgumentException("상품 옵션을 찾을 수 없습니다."));
 
@@ -49,7 +49,7 @@ public class OrderService {
         Product product = option.getProduct();
         wishRepository.findByUserAndProduct(user, product)
                 .ifPresent(wishRepository::delete);
-
+        kakaoMessageService.sendOrderMessage(order, accessToken);
         return new OrderResponseDTO(order);
     }
 }
