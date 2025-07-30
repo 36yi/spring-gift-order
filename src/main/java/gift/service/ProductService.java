@@ -36,9 +36,6 @@ public class ProductService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 상품이 없습니다. id=" + id));
     }
 
-    public void addProductByAdmin(Product product) {
-        productRepository.save(product);
-    }
     public void addProduct(@Valid ProductRequestDTO dto) {
         Product product = new Product();
         product.setName(dto.name());
@@ -74,6 +71,9 @@ public class ProductService {
         } else {
             product.setMdApproved(false);
         }
+        productRepository.save(product);
+    }
+    public void approveProduct(Product product){
         productRepository.save(product);
     }
 }
