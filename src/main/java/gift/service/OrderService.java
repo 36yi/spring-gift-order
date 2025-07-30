@@ -50,6 +50,6 @@ public class OrderService {
         wishRepository.findByUserAndProduct(user, product)
                 .ifPresent(wishRepository::delete);
         kakaoMessageService.sendOrderMessage(order, accessToken);
-        return new OrderResponseDTO(order);
+        return OrderResponseDTO.from(order);
     }
 }
