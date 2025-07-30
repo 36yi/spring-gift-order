@@ -10,6 +10,7 @@ import gift.repository.OrderRepository;
 import gift.repository.ProductOptionRepository;
 import gift.repository.UserRepository;
 import gift.repository.WishRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class OrderService {
         this.kakaoMessageService = kakaoMessageService;
         }
 
+    @Transactional
     public OrderResponseDTO createOrder(OrderRequestDTO request, User user,String accessToken) {
         ProductOption option = productOptionRepository.findById(request.optionId())
                 .orElseThrow(() -> new IllegalArgumentException("상품 옵션을 찾을 수 없습니다."));

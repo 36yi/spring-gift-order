@@ -27,7 +27,7 @@ public class UserService {
 
     public String kakaoLogin(LoginRequestDTO login, String kakaoAccessToken) {
         Optional<User> userOpt = userRepository.findByUserid(login.getUserid());
-        User user = userOpt.orElseThrow(() -> new RuntimeException("없음"));
+        User user = userOpt.orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. (userId: " + login.getUserid() + ")"));
         return jwtTokenProvider.createToken(user.getUserid(), user.getPassword(), kakaoAccessToken);
     }
 
