@@ -6,6 +6,7 @@ import gift.dto.OrderResponseDTO;
 import gift.jwt.JwtTokenProvider;
 import gift.jwt.JwtUtils;
 import gift.model.User;
+import gift.service.KakaoOAuthService;
 import gift.service.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -20,11 +21,13 @@ public class OrderController {
     private final OrderService orderService;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtUtils jwtUtils;
+    private final KakaoOAuthService kakaoOAuthService;
 
-    public OrderController(OrderService orderService, JwtTokenProvider jwtTokenProvider, JwtUtils jwtUtils) {
+    public OrderController(KakaoOAuthService kakaoOAuthService, OrderService orderService, JwtTokenProvider jwtTokenProvider, JwtUtils jwtUtils) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.orderService = orderService;
         this.jwtUtils = jwtUtils;
+        this.kakaoOAuthService = kakaoOAuthService;
     }
 
     @PostMapping
@@ -34,7 +37,7 @@ public class OrderController {
         String accessToken = null;
         String pureToken = jwtUtils.extractPureToken(jwtToken);
         if (pureToken != null) {
-            accessToken = jwtUtils.getKakaoAccessTokenFromPureToken(pureToken);
+            accessToken = kakaoOAuthService.getKakaoAccessTokenFromPureToken(pureToken);
         } else {
             return ResponseEntity.badRequest().body(null);
         }

@@ -15,7 +15,5 @@ public class JwtUtils {
         }
         return null;
     }
-    public String getKakaoAccessTokenFromPureToken(String pureToken) {
-        return jwtTokenProvider.getKakaoAccessTokenFromToken(pureToken);
-    }
+
 }
