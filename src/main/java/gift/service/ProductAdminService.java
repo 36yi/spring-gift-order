@@ -15,4 +15,8 @@ public class ProductAdminService {
     public void addProduct(Product product) {
         productRepository.save(product);
     }
+
+    public void approveProduct(Product product){
+        productRepository.save(product);
+    }
 }

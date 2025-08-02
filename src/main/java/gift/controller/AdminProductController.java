@@ -83,7 +83,7 @@ public class AdminProductController {
         Product product = productService.getProductById(id);
         product.setMdApproved(true);
         log.info("<UNK> <UNK>: " + product.getMdApproved());
-        productService.approveProduct(product);
+        productAdminService.approveProduct(product);
         return "redirect:/admin/products";
     }
 

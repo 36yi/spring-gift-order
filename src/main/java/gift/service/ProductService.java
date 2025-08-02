@@ -73,7 +73,5 @@ public class ProductService {
         }
         productRepository.save(product);
     }
-    public void approveProduct(Product product){
-        productRepository.save(product);
-    }
+
 }
