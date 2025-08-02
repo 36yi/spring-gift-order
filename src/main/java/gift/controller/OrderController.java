@@ -21,27 +21,22 @@ public class OrderController {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtUtils jwtUtils;
 
-    public OrderController(OrderService orderService, JwtTokenProvider jwtTokenProvider) {
+    public OrderController(OrderService orderService, JwtTokenProvider jwtTokenProvider, JwtUtils jwtUtils) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.orderService = orderService;
-        this.jwtUtils = new JwtUtils(jwtTokenProvider);
+        this.jwtUtils = jwtUtils;
     }
 
     @PostMapping
     public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO request,
                                                         @LoginUser User user,
-                                                        @RequestHeader(value = "Authorization", required = false) Optional<String> jwtTokenOptional) {
+                                                        @RequestHeader(value = "Authorization", required = false) String jwtToken) {
         String accessToken = null;
-        if (jwtTokenOptional.isPresent()) {
-            String jwtToken = jwtTokenOptional.get();
-            String pureToken = jwtUtils.extractPureToken(jwtToken);
-            if (pureToken != null) {
-                accessToken = jwtUtils.getKakaoAccessTokenFromPureToken(pureToken);
-            } else {
-                return ResponseEntity.badRequest().body(null);
-            }
+        String pureToken = jwtUtils.extractPureToken(jwtToken);
+        if (pureToken != null) {
+            accessToken = jwtUtils.getKakaoAccessTokenFromPureToken(pureToken);
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.badRequest().body(null);
         }
 
         if (accessToken == null) {

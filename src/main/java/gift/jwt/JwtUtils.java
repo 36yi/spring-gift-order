@@ -1,5 +1,8 @@
 package gift.jwt;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class JwtUtils {
     private final JwtTokenProvider jwtTokenProvider; // JwtTokenProvider를 주입받는다고 가정
 
